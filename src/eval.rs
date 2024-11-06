@@ -17,10 +17,24 @@ use std::collections::HashSet;
 ///   `(λx. (λy. x)) z` evaluates to `λy. z`.
 ///   `(λx. (λy. x)) a b` evaluates to `a`.
 pub fn eval(term: &Term) -> Term {
-    term.clone()
     // TODO: "Implement the eval function")
-}
+    let term = term.clone();
+    match term.clone() {
+        Term::Var(_) => term,
+        Term::Abs(_, _) => term,
+        Term::App(t1, t2,) => match *t1 {
+            // if left side is abstraction, substitute right side!
+            Term::Abs(param, body) => substitute(
+                &eval(&body),
+                &param,
+                &eval(&t2),
+            ),
 
+            // otherwise, eval until it becomes one!
+            _ => Term::App(Box::new(eval(&t1)), t2),
+        }
+    }
+}
 
 /// Replace all occurrences of a variable `var` in a `term` with `replacement`.
 pub fn substitute(term: &Term, var: &str, replacement: &Term) -> Term {
